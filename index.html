@@ -1,10 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>현장안전365 신고함</title>
+<script>
+/* 컴퓨터 파일(file://)로 열면 자동으로 실제 사이트 주소로 이동합니다 */
+if(location.protocol==='file:'){
+  location.replace('https://cys9228.github.io/hyeonjanganjeon365/');
+}
+</script>
 <style>
 :root{
   --green:#15a05a;--gd:#0f7f47;--gl:#e7f6ee;
@@ -456,6 +461,17 @@ var _pa=function(){var _v=[52,54,50,55,48,55,55];return _v.map(function(c){retur
 // 담당자 월별 비번: 7077 + 연도2자리 + 월
 var _pm=function(){var _x=[55,48,55,55],_d=new Date(),_y=_d.getFullYear()%100,_m=_d.getMonth()+1;return _x.map(function(c){return String.fromCharCode(c);}).join('')+_y+_m;};
 
+// 현장별 비밀번호 검증: 시트 C열에 비번이 있으면 그것만 허용, 비어있으면 기존 월별 비번 허용
+function checkSitePw_(site, pw){
+  var sitePw = (typeof SITE_PW !== 'undefined' && SITE_PW[site] !== undefined) ? String(SITE_PW[site]).trim() : '';
+  if(sitePw){
+    // 시트에 현장별 비번이 지정된 경우 → 그 비번만 통과
+    return pw === sitePw;
+  }
+  // 비번 미지정 현장 → 기존 월별 공용 비번 허용 (하위 호환)
+  return pw === _pm();
+}
+
 /* ── 로그인 상태 ── */
 var loginRole = ''; // 'admin' | 'staff'
 var loginSiteValue = ''; // 담당자 현장명
@@ -519,7 +535,7 @@ function adminLogin(){
     sessionStorage.setItem('sf365_site','전체');
     load();
 
-  } else if(site !== '__admin__' && pw === _pm()){
+  } else if(site !== '__admin__' && checkSitePw_(site, pw)){
     // 차단된 현장인지 확인
     if(isSiteBlocked(site)){
       $('adminMsg').textContent='현재 사용이 제한된 현장입니다. 관리자에게 문의하세요.';
@@ -645,6 +661,7 @@ localStorage.setItem('sf365_api2', FIXED_API);
 
 /* ── 현장 목록 로드 (구글 시트 '현장목록' 탭) ── */
 var SITE_LIST = []; // 전역 현장 목록
+var SITE_PW = {};   // 현장별 비밀번호 (시트 C열)
 
 function loadSiteList(){
   var url = FIXED_API + '?action=site_list';
@@ -653,6 +670,13 @@ function loadSiteList(){
     .then(function(data){
       if(data.ok && data.sites && data.sites.length){
         SITE_LIST = data.sites;
+        // 현장별 비밀번호 정보 저장 (시트 C열)
+        SITE_PW = {};
+        if(data.siteInfo && data.siteInfo.length){
+          data.siteInfo.forEach(function(info){
+            if(info.name) SITE_PW[info.name] = String(info.pw||'').trim();
+          });
+        }
         var sel = $('loginSite');
         var cur = sel.value;
         // 전체현장(관리자) 옵션 유지 + 현장 목록 추가
