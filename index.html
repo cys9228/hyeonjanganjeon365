@@ -332,6 +332,18 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
   /* 최종확인 */
   .aprow-done{margin-top:6px}
   .approved{font-size:11px;padding:4px 10px}
+
+  /* ── TBM 참석표: 한 줄에 들어가게 ── */
+  .tbm-table{font-size:10px !important;table-layout:auto;width:100%}
+  .tbm-table th,
+  .tbm-table td{
+    white-space:nowrap !important;   /* 줄바꿈 금지 → 한 줄 강제 */
+    padding:5px 4px !important;
+    font-size:10px !important;
+    overflow:hidden;
+  }
+  .tbm-table th{font-size:9.5px !important;letter-spacing:-.3px}
+  .tbm-count-badge{font-size:18px;padding:6px 14px;margin-bottom:8px}
 }
 </style>
 </head>
