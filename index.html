@@ -232,9 +232,10 @@ select.s0{color:var(--c2)}select.s1{color:#b9770e}select.s2{color:var(--gd)}
   padding:10px 20px;border-radius:12px;text-align:center;margin-bottom:12px}
 .tbm-count-badge span{font-size:12px;color:var(--sub);display:block;margin-top:2px;font-weight:500}
 .tbm-table{width:100%;border-collapse:collapse;font-size:13px}
-.tbm-table th{background:#f8fafb;padding:8px 10px;text-align:left;font-weight:700;
-  border-bottom:2px solid var(--line);color:var(--sub);font-size:12px}
-.tbm-table td{padding:8px 10px;border-bottom:1px solid var(--line)}
+.tbm-table th{background:#f8fafb;padding:8px 8px;text-align:left;font-weight:700;
+  border-bottom:2px solid var(--line);color:var(--sub);font-size:12px;white-space:nowrap}
+.tbm-table td{padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbm-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tbm-table tr:last-child td{border-bottom:none}
 .tbm-table tr:hover td{background:#f8fafb}
 @media print{.tbm-sec{break-inside:avoid;page-break-inside:avoid}}
@@ -409,10 +410,12 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
     </div>
     <div class="tbm-count-badge" id="tbmCountBadge">0<span>명 참석</span></div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px" id="tbmStats"></div>
+    <div class="tbm-wrap">
     <table class="tbm-table">
-      <thead><tr><th>#</th><th>이름</th><th>소속/업체</th><th>1.위험요인</th><th>2.위험성평가</th><th>3.개선의견</th><th>4.사고발생</th><th>4.질병·상해</th><th>참석시간</th><th>퇴근시간</th></tr></thead>
+      <thead><tr><th>#</th><th>이름</th><th>소속</th><th>위험요인</th><th>위험평가</th><th>개선의견</th><th>사고</th><th>질병</th><th>참석</th><th>퇴근</th></tr></thead>
       <tbody id="tbmBody"><tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">불러오는 중…</td></tr></tbody>
     </table>
+    </div>
   </div>
 
   <!-- 교육이수 확인서 섹션 -->
