@@ -1313,9 +1313,19 @@ function loadTbm(){
   fetch(url+sep+'action=tbm_list&date='+td)
     .then(function(r){ return r.json(); })
     .then(function(data){
-      if(!Array.isArray(data)||!data.length){
+      data = Array.isArray(data) ? data : [];
+      // 현장 필터: 담당자는 본인 현장만, 관리자는 선택 현장(전체면 전부)
+      var wantSite = (loginRole==='staff') ? loginSiteValue : activeSite;
+      if(wantSite && wantSite!=='전체'){
+        data = data.filter(function(r){
+          var rs = r.site || r.현장 || r.dept || '';
+          return normSite(rs)===normSite(wantSite);
+        });
+      }
+      if(!data.length){
         $('tbmCountBadge').innerHTML='0<span>명 참석</span>';
-        $('tbmBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">오늘 참석자가 없습니다.</td></tr>';
+        $('tbmStats').innerHTML='';
+        $('tbmBody').innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--sub);padding:20px">오늘 참석자가 없습니다.</td></tr>';
         return;
       }
       $('tbmCountBadge').innerHTML=data.length+'<span>명 참석 · '+esc(td)+'</span>';
