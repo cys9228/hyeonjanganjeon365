@@ -263,7 +263,8 @@ body.admin-mode #siteManagerPanel{ display:block; }
 
 /* ── 관리자 잠금 ── */
 .admin-only{ display:none !important; }          /* 잠금 상태: 숨김 */
-body.admin-mode .admin-only{ display:'' !important; }  /* 관리자 모드: 표시 */
+body.admin-mode .admin-only{ display:revert !important; }  /* 관리자 모드: 표시 */
+body.admin-mode .card-actions.admin-only{ display:flex !important; }
 body.admin-mode .admin-only.flex{ display:flex !important; }
 body.admin-mode .admin-only.inline{ display:inline-block !important; }
 
