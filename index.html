@@ -357,7 +357,7 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
     <!-- 관리자 로그인 배너 -->
     <div id="adminBar">
       <span>🔒</span>
-      <select id="loginSite" style="padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px;min-width:140px">
+      <select id="loginSite" style="padding:10px 14px;border:2px solid #f97316;border-radius:9px;font-size:14px;min-width:160px;background:linear-gradient(135deg,#fff7ed,#ffedd5);color:#9a3412;font-weight:800;box-shadow:0 2px 6px rgba(234,88,12,.2)">
         <option value="__admin__">전체현장 (관리자)</option>
         <option value="" disabled>── 현장 불러오는 중… ──</option>
       </select>
@@ -383,7 +383,7 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
       <span style="color:var(--sub)">~</span>
       <input type="date" id="dTo">
       <button class="btn sm outline" id="clearDate">전체</button>
-      <button class="btn admin-only" id="usbSaveBtn" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:17px;font-weight:800;padding:14px 26px;border-radius:12px;box-shadow:0 3px 10px rgba(234,88,12,.35)" title="사진+데이터를 USB/파일로 백업">💾 USB 백업</button>
+      <button class="btn" id="usbSaveBtn" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:17px;font-weight:800;padding:14px 26px;border-radius:12px;box-shadow:0 3px 10px rgba(234,88,12,.35)" title="사진+데이터를 USB/파일로 백업">💾 USB 백업</button>
       <button class="btn admin-only" id="usbLoadBtn" style="background:#0e9488;color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:10px;display:none" title="백업 파일에서 복원">📂 불러오기</button>
       <input type="file" id="usbLoadFile" accept=".json,application/json" style="display:none">
       <button class="btn sm" id="tbmBtn" style="background:#15a05a;color:#fff">✅ TBM 참석현황</button>
@@ -616,6 +616,8 @@ function adminLogout(){
 })();
 
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+/* 현장 이름 비교용: 모든 공백 제거 후 비교 (띄어쓰기/표기 차이 무시) */
+function normSite(s){ return String(s==null?'':s).replace(/\s+/g,'').trim(); }
 
 /* ── IndexedDB 초기화 ── */
 function initDB(cb){
@@ -738,9 +740,9 @@ function load(cb){
       allItems.forEach(function(it){ var s=String(it.site||'').trim(); if(s&&sites.indexOf(s)<0) sites.push(s); });
       var sel=$('siteFilter');
       // 담당자는 본인 현장만, 관리자는 전체
-      var visibleSites = (loginRole==='staff') ? sites.filter(function(s){ return s===loginSiteValue; }) : sites;
+      var visibleSites = (loginRole==='staff') ? sites.filter(function(s){ return normSite(s)===normSite(loginSiteValue); }) : sites;
       sel.innerHTML=visibleSites.map(function(s){ return '<option value="'+esc(s)+'"'+(s===activeSite?' selected':'')+'>'+esc(s==='전체'?'전체 현장':s)+'</option>'; }).join('');
-      if(visibleSites.indexOf(activeSite)<0) activeSite = loginRole==='staff'?loginSiteValue:'전체';
+      if(visibleSites.indexOf(activeSite)<0) activeSite = loginRole==='staff'?(visibleSites[0]||loginSiteValue):'전체';
       // 로그인 배너의 현장 드롭다운 — SITE_LIST 기준으로 유지 (이미 loadSiteList로 채워짐)
       // 데이터에서 새 현장 발견 시 SITE_LIST에 추가
       sites.filter(function(s){return s!=='전체';}).forEach(function(s){
@@ -777,7 +779,7 @@ function render(){
 
   var filtered=allItems.filter(function(it){
     // 현장 필터
-    if(activeSite!=='전체' && String(it.site||'').trim()!==activeSite) return false;
+    if(activeSite!=='전체' && normSite(it.site)!==normSite(activeSite)) return false;
     return inRange(it);
   });
   renderBrief(filtered);
