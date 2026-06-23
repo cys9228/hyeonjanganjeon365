@@ -382,7 +382,9 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
       <span style="color:var(--sub)">~</span>
       <input type="date" id="dTo">
       <button class="btn sm outline" id="clearDate">전체</button>
-      <button class="btn sm admin-only" id="usbSaveBtn" style="background:#2563eb;color:#fff" title="사진 데이터를 USB/파일로 저장">💾 USB 저장</button>
+      <button class="btn admin-only" id="usbSaveBtn" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-size:17px;font-weight:800;padding:14px 26px;border-radius:12px;box-shadow:0 3px 10px rgba(234,88,12,.35)" title="사진+데이터를 USB/파일로 백업">💾 USB 백업</button>
+      <button class="btn admin-only" id="usbLoadBtn" style="background:#0e9488;color:#fff;font-size:14px;font-weight:700;padding:12px 18px;border-radius:10px;display:none" title="백업 파일에서 복원">📂 불러오기</button>
+      <input type="file" id="usbLoadFile" accept=".json,application/json" style="display:none">
       <button class="btn sm" id="tbmBtn" style="background:#15a05a;color:#fff">✅ TBM 참석현황</button>
       <button class="btn sm" id="eduBtn" style="background:#2563eb;color:#fff">🎬 교육이수 확인서</button>
       <span id="usbStatus" style="font-size:12px;color:var(--gd);font-weight:700"></span>
@@ -713,7 +715,7 @@ function loadSiteList(){
 }
 
 /* ── 데이터 로드 ── */
-function load(){
+function load(cb){
   var url=$('apiUrl').value.trim();
   if(!url){ $('list').innerHTML='<div class="empty">API 주소를 저장해주세요.</div>'; return; }
   // 로컬 파일(file://) 실행 시 경고
@@ -744,6 +746,7 @@ function load(){
         if(SITE_LIST.indexOf(s)<0) SITE_LIST.push(s);
       });
       render();
+      if(typeof cb==='function') cb();
     })
     .catch(function(e){
       var msg = String(e);
@@ -1159,22 +1162,24 @@ function usbSave(){
   var req=tx.objectStore(DB_STORE).getAll();
   req.onsuccess=function(e){
     var data=e.target.result||[];
-    var json=JSON.stringify({ver:1,saved:new Date().toISOString(),photos:data},null,0);
+    var reports=allItems||[];   // 현재 불러온 신고 데이터(글자)도 함께 백업
+    var json=JSON.stringify({ver:2,saved:new Date().toISOString(),photos:data,reports:reports},null,0);
     var d=new Date();
-    var fname='신고함사진_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.json';
+    var fname='현장안전365_백업_'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'.json';
+    var msg='✅ 백업 완료 (사진 '+data.length+'건 · 데이터 '+reports.length+'건)';
 
     // File System Access API 지원 시 → 위치 직접 선택
     if(window.showSaveFilePicker){
       window.showSaveFilePicker({
         suggestedName: fname,
-        types:[{description:'신고함 데이터',accept:{'application/json':['.json']}}]
+        types:[{description:'현장안전365 백업',accept:{'application/json':['.json']}}]
       }).then(function(fh){
         return fh.createWritable();
       }).then(function(w){
         return w.write(json).then(function(){ return w.close(); });
       }).then(function(){
-        $('usbStatus').textContent='✅ 저장 완료 ('+data.length+'건)';
-        setTimeout(function(){ $('usbStatus').textContent=''; },3000);
+        $('usbStatus').textContent=msg;
+        setTimeout(function(){ $('usbStatus').textContent=''; },4000);
       }).catch(function(err){
         if(err.name!=='AbortError') alert('저장 실패: '+String(err));
       });
@@ -1185,8 +1190,8 @@ function usbSave(){
       var a=document.createElement('a');
       a.href=url; a.download=fname; a.click();
       URL.revokeObjectURL(url);
-      $('usbStatus').textContent='✅ 저장 완료 ('+data.length+'건)';
-      setTimeout(function(){ $('usbStatus').textContent=''; },3000);
+      $('usbStatus').textContent=msg;
+      setTimeout(function(){ $('usbStatus').textContent=''; },4000);
     }
   };
 }
@@ -1198,7 +1203,21 @@ function usbLoad(file){
     try{
       var obj=JSON.parse(e.target.result);
       var photos=obj.photos||[];
-      if(!photos.length){ alert('사진 데이터가 없습니다.'); return; }
+      var reports=obj.reports||[];
+      if(!photos.length && !reports.length){ alert('백업 파일에 데이터가 없습니다.'); return; }
+
+      // 1) 신고 데이터(글자) 복원
+      if(reports.length){
+        allItems=reports.filter(function(it){ return TYPES.indexOf(it.type)!==-1; });
+      }
+
+      // 2) 사진 복원
+      if(!photos.length){
+        $('usbStatus').textContent='✅ 데이터 복원 완료 ('+reports.length+'건)';
+        setTimeout(function(){ $('usbStatus').textContent=''; },4000);
+        render();
+        return;
+      }
       var tx=db.transaction(DB_STORE,'readwrite');
       var store=tx.objectStore(DB_STORE);
       var done=0;
@@ -1207,8 +1226,8 @@ function usbLoad(file){
         req.onsuccess=function(){
           done++;
           if(done===photos.length){
-            $('usbStatus').textContent='✅ 불러오기 완료 ('+photos.length+'건)';
-            setTimeout(function(){ $('usbStatus').textContent=''; },3000);
+            $('usbStatus').textContent='✅ 복원 완료 (사진 '+photos.length+'건 · 데이터 '+reports.length+'건)';
+            setTimeout(function(){ $('usbStatus').textContent=''; },4000);
             render(); // 화면 갱신
           }
         };
@@ -1364,7 +1383,23 @@ $('dTo').addEventListener('change',render);
 $('clearDate').addEventListener('click',function(){ $('dFrom').value=''; $('dTo').value=''; render(); });
 $('printBtn').addEventListener('click',function(){ window.print(); });
 $('bfClose').addEventListener('click',function(){ $('bfull').classList.remove('show'); });
-$('usbSaveBtn').addEventListener('click',usbSave);
+function usbBackup(){
+  $('usbStatus').textContent='🔄 최신 데이터 불러오는 중…';
+  load(function(){
+    $('usbStatus').textContent='💾 백업 저장 중…';
+    setTimeout(usbSave, 400);   // 사진 비동기 로드 잠깐 대기 후 저장
+  });
+}
+$('usbSaveBtn').addEventListener('click',usbBackup);
+$('usbLoadBtn') && $('usbLoadBtn').addEventListener('click',function(){ $('usbLoadFile').click(); });
+$('usbLoadFile') && $('usbLoadFile').addEventListener('change',function(){
+  if(this.files && this.files[0]){
+    if(confirm('백업 파일에서 복원하시겠습니까?\n현재 화면 데이터가 백업 내용으로 바뀝니다.')){
+      usbLoad(this.files[0]);
+    }
+    this.value='';
+  }
+});
 $('tbmBtn').addEventListener('click',loadTbm);
 $('eduBtn').addEventListener('click',loadEdu);
 $('eduRefresh') && $('eduRefresh').addEventListener('click',loadEdu);
