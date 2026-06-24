@@ -1285,7 +1285,7 @@ function loadTbm(){
           '<td>'+
             ((r.photoUrls&&r.photoUrls.length)
               ? r.photoUrls.map(function(u){
-                  return '<img src="'+esc(u)+'" style="width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #d6dbe2;margin:1px" onclick="showLB(''+esc(u)+'')">';
+                  return '<img src="'+esc(u)+'" style="width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #d6dbe2;margin:1px" onclick="showLB(this.src)">';
                 }).join('')
               : '<span style="color:#9ca3af;font-size:11px">-</span>')+
           '</td>'+
