@@ -98,7 +98,7 @@ header h1{font-size:15px;font-weight:800;margin-bottom:8px}
               border:1px solid #fca5a5;border-radius:8px;padding:5px 12px;margin-bottom:10px;display:inline-block}
 
 .photo-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.photo-box{border-radius:8px;overflow:hidden;border:2px solid var(--line);background:#f8fafb;max-height:220px}
+.photo-box{border-radius:8px;overflow:hidden;border:2px solid var(--line);background:#f8fafb;max-height:410px}
 .photo-box.danger{border-color:#f87171}
 .photo-box.action{border-color:#86efac}
 .photo-box-title{padding:5px 10px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:space-between}
@@ -846,8 +846,8 @@ function renderPhotos(arr,gridId,reportId,ptype,serverCount){
     var wrap=document.createElement('div'); wrap.className='photo-item';
     var img=document.createElement('img'); img.src=src;
     img.style.width='100%';
-    img.style.height='180px';
-    img.style.maxHeight='180px';
+    img.style.height='380px';
+    img.style.maxHeight='380px';
     img.style.objectFit='cover';
     img.style.cursor='pointer';
     img.style.borderRadius='4px';
