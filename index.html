@@ -1263,7 +1263,7 @@ function loadTbm(){
       $('tbmBody').innerHTML=data.map(function(r,i){
         var rowId='tbmRow_'+i;
         var detailId='tbmDetail_'+i;
-        return '<tr style="cursor:pointer" onclick="tbmToggleDetail(''+detailId+'',''+esc(JSON.stringify(r).replace(/'/g,'\\')+'')">'+
+        return '<tr style="cursor:pointer" onclick="tbmToggleDetail(\'' + detailId + '\')">'+
           '<td>'+(i+1)+'</td>'+
           '<td><b>'+esc(r.name||'')+'</b></td>'+
           '<td>'+esc(r.dept||'')+'</td>'+
