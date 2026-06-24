@@ -224,7 +224,21 @@ select.s0{color:var(--c2)}select.s1{color:#b9770e}select.s2{color:var(--gd)}
 .tbm-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .tbm-table tr:last-child td{border-bottom:none}
 .tbm-table tr:hover td{background:#f8fafb}
-@media print{.tbm-sec{break-inside:avoid;page-break-inside:avoid}}
+@media print{
+  .tbm-sec{break-inside:avoid;page-break-inside:avoid}
+  .tbm-table tr{break-inside:avoid;page-break-inside:avoid}
+  #tbmBody tr{break-inside:avoid;page-break-inside:avoid}
+  #tbmBody td{break-inside:avoid}
+  /* TBM 상세카드 인쇄 */
+  #tbmBody tr[id^="tbmDetail_"]{display:table-row !important}
+  #tbmBody tr[id^="tbmDetail_"] .detail-inner,
+  #tbmBody tr[id^="tbmDetail_"] > td > div{
+    break-inside:avoid;page-break-inside:avoid
+  }
+  #tbmBody tr[id^="tbmDetail_"] img{
+    max-height:160px !important;width:100% !important;object-fit:cover
+  }
+}
 .loading{text-align:center;color:var(--sub);padding:30px 0}
 
 #siteManagerPanel{
@@ -314,7 +328,8 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
   .aprow-done{margin-top:6px}
   .approved{font-size:11px;padding:4px 10px}
 
-  .tbm-table{font-size:10px !important;table-layout:auto;width:100%}
+  .tbm-table{font-size:10px !important;table-layout:auto;width:100%;word-break:break-all}
+  .tbm-wrap{overflow:visible !important}
   .tbm-table th,
   .tbm-table td{
     white-space:nowrap !important;
