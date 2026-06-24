@@ -90,7 +90,7 @@ header h1{font-size:20px;font-weight:800;margin-bottom:12px}
 .badge.etc{background:#9ca3af}
 .ctime{color:var(--sub);font-size:12px}
 .cid{color:var(--sub);font-size:11px;margin-left:auto}
-.ctitle{font-size:13px;font-weight:800;margin:6px 0}
+
 .cmeta{font-size:13px;color:var(--sub);display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px}
 .cmeta b{color:var(--ink);font-weight:700}
 /* 유해위험요인 강조 */
@@ -293,7 +293,7 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
   .icard{break-inside:avoid;page-break-inside:avoid;
          box-shadow:none;border-radius:6px;padding:12px;margin-bottom:10px}
   .badge{font-size:11px;padding:3px 8px}
-  .ctitle{font-size:13px}
+
   .cmeta{font-size:11px;gap:10px}
 
   /* 유해위험요인 인쇄 시 강조 */
@@ -750,7 +750,6 @@ function render(){
         '<span class="cid">'+esc(it.id||'')+'</span>'+
       '</div>'+
       hazardHtml+
-      '<div class="ctitle">'+esc(it.note||it.hazard||'(내용 없음)')+'</div>'+
       '<div class="cmeta">'+
         '<span><b>현장</b> '+esc(it.site||'-')+'</span>'+
         '<span><b>위치</b> '+esc(it.location||'-')+'</span>'+
