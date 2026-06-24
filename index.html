@@ -390,7 +390,7 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px" id="tbmStats"></div>
     <div class="tbm-wrap">
     <table class="tbm-table">
-      <thead><tr><th>#</th><th>이름</th><th>소속</th><th>위험요인</th><th>위험평가</th><th>개선의견</th><th>사고</th><th>질병</th><th>참석</th><th>퇴근</th><th>📸 조치전</th><th>✅ 조치후</th></tr></thead>
+      <thead><tr><th>#</th><th>이름</th><th>소속</th><th>위험요인</th><th>위험평가</th><th>개선의견</th><th>사고</th><th>질병</th><th>참석</th><th>퇴근</th><th>📸 사진</th></tr></thead>
       <tbody id="tbmBody"><tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">불러오는 중…</td></tr></tbody>
     </table>
     </div>
@@ -1231,7 +1231,7 @@ function loadTbm(){
       if(!data.length){
         $('tbmCountBadge').innerHTML='0<span>명 참석</span>';
         $('tbmStats').innerHTML='';
-        $('tbmBody').innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--sub);padding:20px">오늘 참석자가 없습니다.</td></tr>';
+        $('tbmBody').innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--sub);padding:20px">오늘 참석자가 없습니다.</td></tr>';
         return;
       }
       $('tbmCountBadge').innerHTML=data.length+'<span>명 참석 · '+esc(td)+'</span>';
@@ -1261,7 +1261,9 @@ function loadTbm(){
         return '<td style="white-space:normal"><span style="font-size:11px;font-weight:800;color:#c0392b;background:#fff0f0;border:1px solid #fca5a5;border-radius:6px;padding:2px 7px;display:inline-block">⚠️ 유해위험요인 : '+esc(label)+'/'+esc(val)+'</span></td>';
       }
       $('tbmBody').innerHTML=data.map(function(r,i){
-        return '<tr>'+
+        var rowId='tbmRow_'+i;
+        var detailId='tbmDetail_'+i;
+        return '<tr style="cursor:pointer" onclick="tbmToggleDetail(''+detailId+'',''+esc(JSON.stringify(r).replace(/'/g,'\\')+'')">'+
           '<td>'+(i+1)+'</td>'+
           '<td><b>'+esc(r.name||'')+'</b></td>'+
           '<td>'+esc(r.dept||'')+'</td>'+
@@ -1282,25 +1284,211 @@ function loadTbm(){
             return m?m[1].padStart(2,'0')+':'+m[2]:'-';
           })(r.outTime)+
           '</td>'+
-          '<td style="border-left:2px solid #f87171">'+
+          '<td style="border-left:2px solid #f87171;min-width:60px">'+
             ((r.beforeUrls&&r.beforeUrls.length)
               ? r.beforeUrls.map(function(u){
-                  return '<img src="'+u+'" style="width:52px;height:52px;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid #f87171;margin:1px" onclick="showLB(this.src)">';
+                  return '<img src="'+u+'" style="width:56px;height:56px;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid #f87171;margin:1px" onclick="showLB(this.src)">';
                 }).join('')
               : '<span style="color:#9ca3af;font-size:11px">-</span>')+
           '</td>'+
-          '<td style="border-left:2px solid #86efac">'+
-            ((r.afterUrls&&r.afterUrls.length)
-              ? r.afterUrls.map(function(u){
-                  return '<img src="'+u+'" style="width:52px;height:52px;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid #86efac;margin:1px" onclick="showLB(this.src)">';
-                }).join('')
-              : '<span style="color:#9ca3af;font-size:11px">-</span>')+
+        '</tr>'+
+        '<tr id="tbmDetail_'+i+'" style="display:none">'+
+          '<td colspan="11" style="padding:0;border-top:none">'+
+            '<div style="padding:14px;background:#fafbfc;border-bottom:2px solid var(--line)">'+
+
+              '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">'+
+
+                '<div style="border:2px solid #f87171;border-radius:10px;overflow:hidden">'+
+                  '<div style="background:#fff8f8;padding:8px 12px;font-size:13px;font-weight:700;color:#c0392b;display:flex;justify-content:space-between;align-items:center">'+
+                    '📸 조치 전 사진'+
+                    '<label style="font-size:11px;font-weight:600;color:var(--c2);cursor:pointer;border:1px solid var(--c2);padding:3px 8px;border-radius:6px" class="admin-only inline">+ 추가<input type="file" accept="image/*" capture="environment" multiple style="display:none" class="tbm-pfile" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" data-type="before" data-idx="'+i+'"></label>'+
+                  '</div>'+
+                  '<div style="padding:6px;min-height:60px" id="tbmBefore_'+i+'">'+
+                    ((r.beforeUrls&&r.beforeUrls.length)
+                      ? r.beforeUrls.map(function(u,ui){
+                          return '<div style="position:relative;display:inline-block;margin:2px">'+
+                            '<img src="'+u+'" style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;cursor:pointer;display:block" onclick="showLB(this.src)">'+
+                            '<button class="admin-only tbm-del-btn" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" data-type="before" data-url="'+esc(u)+'" data-idx="'+i+'" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(192,57,43,.85);color:#fff;border:none;font-size:13px;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center">✕</button>'+
+                          '</div>';
+                        }).join('')
+                      : '<div style="text-align:center;color:var(--sub);padding:20px;font-size:13px">사진 없음</div>')+
+                  '</div>'+
+                '</div>'+
+
+                '<div style="border:2px solid #86efac;border-radius:10px;overflow:hidden">'+
+                  '<div style="background:#f0fdf4;padding:8px 12px;font-size:13px;font-weight:700;color:#0f7f47;display:flex;justify-content:space-between;align-items:center">'+
+                    '✅ 조치 후 사진'+
+                    '<label style="font-size:11px;font-weight:600;color:var(--gd);cursor:pointer;border:1px solid var(--gd);padding:3px 8px;border-radius:6px" class="admin-only inline">+ 추가<input type="file" accept="image/*" capture="environment" multiple style="display:none" class="tbm-pfile" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" data-type="after" data-idx="'+i+'"></label>'+
+                  '</div>'+
+                  '<div style="padding:6px;min-height:60px" id="tbmAfter_'+i+'">'+
+                    ((r.afterUrls&&r.afterUrls.length)
+                      ? r.afterUrls.map(function(u,ui){
+                          return '<div style="position:relative;display:inline-block;margin:2px">'+
+                            '<img src="'+u+'" style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;cursor:pointer;display:block" onclick="showLB(this.src)">'+
+                            '<button class="admin-only tbm-del-btn" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" data-type="after" data-url="'+esc(u)+'" data-idx="'+i+'" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(192,57,43,.85);color:#fff;border:none;font-size:13px;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center">✕</button>'+
+                          '</div>';
+                        }).join('')
+                      : '<div style="text-align:center;color:var(--sub);padding:20px;font-size:13px">사진 없음</div>')+
+                  '</div>'+
+                '</div>'+
+              '</div>'+
+
+              '<div style="border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">'+
+                '<label style="font-size:12px;color:var(--sub);font-weight:700">조치현황</label>'+
+                '<select class="tbm-status '+(r.tbmStatus==='조치완료'?'s2':r.tbmStatus==='조치중'?'s1':'s0')+'" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'">'+
+                  ['미조치','조치중','조치완료'].map(function(s){ return '<option'+(s===(r.tbmStatus||'미조치')?' selected':'')+'>'+s+'</option>'; }).join('')+
+                '</select>'+
+                '<input class="tbm-memo memo" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" placeholder="조치 내용 / 비고" value="'+esc(r.tbmMemo||'')+'" style="flex:1;min-width:120px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px">'+
+              '</div>'+
+
+              '<div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+                (r.tbmApproved
+                  ? '<span style="padding:6px 14px;border-radius:999px;background:var(--gl);color:var(--gd);font-size:13px;font-weight:800">✅ 최종확인 완료 ('+esc(r.tbmApprovedAt||'')+')</span>'
+                  : '<button class="tbm-approve admin-only" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'"'+(r.tbmStatus==='조치완료'?'':' disabled')+' style="padding:8px 18px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:13px;font-weight:800;cursor:pointer">✅ 최종확인</button>'
+                )+
+                '<button class="tbm-edit-toggle admin-only btn sm" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" style="background:#f3f4f6;color:var(--ink);border:1px solid var(--line);padding:7px 12px;font-size:12px;font-weight:800;border-radius:8px;cursor:pointer">✏️ 내용편집</button>'+
+              '</div>'+
+
+              '<div class="tbm-edit-panel" id="tbmEdit_'+esc(r.name)+'_'+esc(r.date||td)+'" style="display:none;margin-top:8px;background:#f8fafb;border:1.5px dashed var(--line);border-radius:10px;padding:12px">'+
+                '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'+
+                  '<div style="flex:1;min-width:140px"><label style="font-size:11px;font-weight:700;color:var(--sub);display:block;margin-bottom:3px">이름</label><input class="tbm-ep-name" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" value="'+esc(r.name||'')+'" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px"></div>'+
+                  '<div style="flex:1;min-width:140px"><label style="font-size:11px;font-weight:700;color:var(--sub);display:block;margin-bottom:3px">소속</label><input class="tbm-ep-dept" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" value="'+esc(r.dept||'')+'" style="width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px"></div>'+
+                '</div>'+
+                '<div style="display:flex;gap:8px;justify-content:flex-end">'+
+                  '<button class="tbm-ep-cancel btn sm outline" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" style="padding:7px 12px;font-size:12px;background:#fff;border:1px solid var(--line);border-radius:8px;cursor:pointer">취소</button>'+
+                  '<button class="tbm-ep-save btn sm" data-id="'+esc(r.name)+'_'+esc(r.date||td)+'" style="padding:7px 12px;font-size:12px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:800">💾 저장</button>'+
+                '</div>'+
+              '</div>'+
+
+            '</div>'+
           '</td>'+
         '</tr>';
       }).join('');
     })
-    .catch(function(e){ $('tbmBody').innerHTML='<tr><td colspan="12" style="color:var(--c2);padding:16px">불러오기 실패: '+String(e)+'</td></tr>'; });
+    .catch(function(e){ $('tbmBody').innerHTML='<tr><td colspan="11" style="color:var(--c2);padding:16px">불러오기 실패: '+String(e)+'</td></tr>'; });
 }
+
+/* TBM 상세 카드 토글 */
+function tbmToggleDetail(detailId){
+  var row=document.getElementById(detailId);
+  if(!row) return;
+  row.style.display=row.style.display==='none'?'table-row':'none';
+}
+
+/* TBM 이벤트 위임 */
+document.addEventListener('change',function(e){
+  var inp=e.target;
+
+  /* 사진 추가 */
+  if(inp.classList.contains('tbm-pfile')){
+    var files=Array.prototype.slice.call(inp.files||[]);
+    if(!files.length) return;
+    var id=inp.getAttribute('data-id');
+    var ptype=inp.getAttribute('data-type');
+    var idx=inp.getAttribute('data-idx');
+    files.forEach(function(file){
+      compress(file,function(dataUrl){
+        var gridId=ptype==='before'?'tbmBefore_'+idx:'tbmAfter_'+idx;
+        var grid=document.getElementById(gridId);
+        if(grid){
+          if(grid.innerHTML.indexOf('사진 없음')>=0) grid.innerHTML='';
+          var wrap=document.createElement('div');
+          wrap.style.cssText='position:relative;display:inline-block;margin:2px';
+          wrap.innerHTML='<img src="'+dataUrl+'" style="width:100%;max-height:200px;object-fit:cover;border-radius:6px;cursor:pointer;display:block" onclick="showLB(this.src)">'+
+            '<button style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(192,57,43,.85);color:#fff;border:none;font-size:13px;cursor:pointer;font-weight:900" onclick="this.parentNode.remove()">✕</button>';
+          grid.appendChild(wrap);
+        }
+        google.script&&google.script.run&&google.script.run
+          .withSuccessHandler(function(){})
+          .tbmPhotoAdd({id:id,type:ptype,photo:dataUrl});
+        inp.value='';
+      });
+    });
+  }
+
+  /* 조치현황 변경 */
+  if(inp.classList.contains('tbm-status')){
+    var id=inp.getAttribute('data-id');
+    var val=inp.value;
+    inp.className='tbm-status '+(val==='조치완료'?'s2':val==='조치중'?'s1':'s0')+' stedit';
+    google.script&&google.script.run&&google.script.run
+      .withSuccessHandler(function(){})
+      .tbmUpdate({id:id,status:val});
+    /* 조치완료면 최종확인 버튼 활성화 */
+    var appBtn=document.querySelector('.tbm-approve[data-id="'+id+'"]');
+    if(appBtn) appBtn.disabled=(val!=='조치완료');
+  }
+
+  /* 메모 변경 */
+  if(inp.classList.contains('tbm-memo')){
+    var id=inp.getAttribute('data-id');
+    google.script&&google.script.run&&google.script.run
+      .withSuccessHandler(function(){})
+      .tbmUpdate({id:id,memo:inp.value});
+  }
+});
+
+document.addEventListener('click',function(e){
+  var btn=e.target;
+
+  /* 사진 삭제 */
+  if(btn.classList.contains('tbm-del-btn')){
+    if(!confirm('이 사진을 삭제하시겠습니까?')) return;
+    var id=btn.getAttribute('data-id');
+    var ptype=btn.getAttribute('data-type');
+    var url=btn.getAttribute('data-url');
+    btn.parentNode.remove();
+    google.script&&google.script.run&&google.script.run
+      .withSuccessHandler(function(){})
+      .tbmPhotoDelete({id:id,type:ptype,url:url});
+  }
+
+  /* 최종확인 */
+  if(btn.classList.contains('tbm-approve')){
+    var id=btn.getAttribute('data-id');
+    btn.disabled=true; btn.textContent='처리 중…';
+    google.script&&google.script.run&&google.script.run
+      .withSuccessHandler(function(res){
+        if(res&&res.ok){
+          btn.outerHTML='<span style="padding:6px 14px;border-radius:999px;background:var(--gl);color:var(--gd);font-size:13px;font-weight:800">✅ 최종확인 완료 ('+esc(res.approvedAt||'')+')</span>';
+        } else { btn.disabled=false; btn.textContent='✅ 최종확인'; alert('실패'); }
+      })
+      .tbmUpdate({id:id,approve:true});
+  }
+
+  /* 내용편집 토글 */
+  if(btn.classList.contains('tbm-edit-toggle')){
+    var id=btn.getAttribute('data-id');
+    var panel=document.getElementById('tbmEdit_'+id);
+    if(panel) panel.style.display=panel.style.display==='none'?'':'none';
+  }
+
+  /* 편집 취소 */
+  if(btn.classList.contains('tbm-ep-cancel')){
+    var id=btn.getAttribute('data-id');
+    var panel=document.getElementById('tbmEdit_'+id);
+    if(panel) panel.style.display='none';
+  }
+
+  /* 편집 저장 */
+  if(btn.classList.contains('tbm-ep-save')){
+    var id=btn.getAttribute('data-id');
+    var nameEl=document.querySelector('.tbm-ep-name[data-id="'+id+'"]');
+    var deptEl=document.querySelector('.tbm-ep-dept[data-id="'+id+'"]');
+    btn.textContent='저장 중…'; btn.disabled=true;
+    google.script&&google.script.run&&google.script.run
+      .withSuccessHandler(function(res){
+        btn.textContent='💾 저장'; btn.disabled=false;
+        if(res&&res.ok){
+          var panel=document.getElementById('tbmEdit_'+id);
+          if(panel) panel.style.display='none';
+          alert('저장되었습니다. ✅');
+          loadTbm();
+        } else { alert('저장 실패'); }
+      })
+      .tbmUpdate({id:id,name:nameEl?nameEl.value:'',dept:deptEl?deptEl.value:''});
+  }
+});
 
 $('reload').addEventListener('click',load);
 $('dFrom').addEventListener('change',render);
