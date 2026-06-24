@@ -1282,28 +1282,15 @@ function loadTbm(){
             return m?m[1].padStart(2,'0')+':'+m[2]:'-';
           })(r.outTime)+
           '</td>'+
-          '<td id="tbmP_'+esc((r.name||'').replace(/[^a-zA-Z0-9가-힣]/g,'_'))+'"><span style="color:#9ca3af;font-size:11px">-</span></td>'+
+          '<td>'+
+            ((r.photoUrls&&r.photoUrls.length)
+              ? r.photoUrls.map(function(u){
+                  return '<img src="'+esc(u)+'" style="width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #d6dbe2;margin:1px" onclick="showLB(''+esc(u)+'')">';
+                }).join('')
+              : '<span style="color:#9ca3af;font-size:11px">-</span>')+
+          '</td>'+
         '</tr>';
       }).join('');
-      // 사진 비동기 로드
-      if(db){
-        data.forEach(function(r){
-          var safeKey='tbm_photo_'+(r.name||'')+'_'+(r.date||td);
-          var cellId='tbmP_'+((r.name||'').replace(/[^a-zA-Z0-9가-힣]/g,'_'));
-          try{
-            var tx2=db.transaction('photos','readonly');
-            var req2=tx2.objectStore('photos').get(safeKey);
-            req2.onsuccess=function(e){
-              var cell=document.getElementById(cellId); if(!cell) return;
-              var pics=e.target.result?e.target.result.val:null;
-              if(!pics||!pics.length) return;
-              cell.innerHTML=pics.map(function(src){
-                return '<img src="'+src+'" style="width:50px;height:50px;object-fit:cover;border-radius:6px;cursor:pointer;border:1px solid #d6dbe2;margin:1px" onclick="showLB(this.src)">';
-              }).join('');
-            };
-          }catch(ex){}
-        });
-      }
     })
     .catch(function(e){ $('tbmBody').innerHTML='<tr><td colspan="11" style="color:var(--c2);padding:16px">불러오기 실패: '+String(e)+'</td></tr>'; });
 }
