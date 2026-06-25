@@ -308,7 +308,9 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
          box-shadow:none;border-radius:6px;padding:12px;margin-bottom:10px}
   .badge{font-size:11px;padding:3px 8px}
 
-  .cmeta{font-size:11px;gap:10px}
+  .cmeta{font-size:11px;gap:10px;border:1px solid #cbd5e1;border-radius:4px;padding:6px 10px;background:#f8fafc;display:flex !important;margin-bottom:8px}
+  .cmeta span{display:inline-block}
+  .cmeta b{color:#000}
 
   /* 유해위험요인 인쇄 시 강조 */
   .hazard-label{font-size:11px;padding:3px 8px;border:1px solid #f87171;background:#fff0f0;
@@ -407,8 +409,8 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px" id="tbmStats"></div>
     <div class="tbm-wrap">
     <table class="tbm-table">
-      <thead><tr><th>#</th><th>이름</th><th>소속</th><th>위험요인</th><th>위험평가</th><th>개선의견</th><th>사고</th><th>질병</th><th>참석</th><th>퇴근</th><th>📸 사진</th></tr></thead>
-      <tbody id="tbmBody"><tr><td colspan="7" style="text-align:center;color:var(--sub);padding:20px">불러오는 중…</td></tr></tbody>
+      <thead><tr><th>#</th><th>현장</th><th>이름</th><th>소속</th><th>위험요인</th><th>위험평가</th><th>개선의견</th><th>사고</th><th>질병</th><th>참석</th><th>퇴근</th><th>📸 사진</th></tr></thead>
+      <tbody id="tbmBody"><tr><td colspan="12" style="text-align:center;color:var(--sub);padding:20px">불러오는 중…</td></tr></tbody>
     </table>
     </div>
   </div>
@@ -1255,7 +1257,7 @@ function loadTbm(){
       if(!data.length){
         $('tbmCountBadge').innerHTML='0<span>명 참석</span>';
         $('tbmStats').innerHTML='';
-        $('tbmBody').innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--sub);padding:20px">오늘 참석자가 없습니다.</td></tr>';
+        $('tbmBody').innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--sub);padding:20px">오늘 참석자가 없습니다.</td></tr>';
         return;
       }
       $('tbmCountBadge').innerHTML=data.length+'<span>명 참석 · '+esc(td)+'</span>';
@@ -1289,6 +1291,7 @@ function loadTbm(){
         var detailId='tbmDetail_'+i;
         return '<tr style="cursor:pointer" onclick="tbmToggleDetail(\'' + detailId + '\')">'+
           '<td>'+(i+1)+'</td>'+
+          '<td style="font-size:11px;color:var(--gd);font-weight:700">'+esc(r.site||'-')+'</td>'+
           '<td><b>'+esc(r.name||'')+'</b></td>'+
           '<td>'+esc(r.dept||'')+'</td>'+
           riskCell('금일위험요인',r.risk1)+
@@ -1317,7 +1320,7 @@ function loadTbm(){
           '</td>'+
         '</tr>'+
         '<tr id="tbmDetail_'+i+'" style="display:none">'+
-          '<td colspan="11" style="padding:0;border-top:none">'+
+          '<td colspan="12" style="padding:0;border-top:none">'+
             '<div style="padding:14px;background:#fafbfc;border-bottom:2px solid var(--line)">'+
 
               '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">'+
@@ -1389,7 +1392,7 @@ function loadTbm(){
         '</tr>';
       }).join('');
     })
-    .catch(function(e){ $('tbmBody').innerHTML='<tr><td colspan="11" style="color:var(--c2);padding:16px">불러오기 실패: '+String(e)+'</td></tr>'; });
+    .catch(function(e){ $('tbmBody').innerHTML='<tr><td colspan="12" style="color:var(--c2);padding:16px">불러오기 실패: '+String(e)+'</td></tr>'; });
 }
 
 /* TBM 상세 카드 토글 */
