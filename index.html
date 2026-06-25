@@ -313,6 +313,8 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
   /* 유해위험요인 인쇄 시 강조 */
   .hazard-label{font-size:11px;padding:3px 8px;border:1px solid #f87171;background:#fff0f0;
                 border-radius:4px;color:#c0392b;font-weight:800;display:inline-block;margin-bottom:6px}
+  /* 인쇄 시 작업중지권 표식 */
+  .icard-head::before{content:"🛑 작업중지권 ";font-weight:800;color:#c0392b;font-size:12px;display:block;margin-bottom:4px}
 
   .photo-wrap{grid-template-columns:1fr 1fr;gap:8px}
   .photo-box{border-radius:6px}
