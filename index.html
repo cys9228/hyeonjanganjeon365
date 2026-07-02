@@ -245,7 +245,11 @@ select.s0{color:var(--c2)}select.s1{color:#b9770e}select.s2{color:var(--gd)}
   display:none;background:#fff;border:1px solid var(--line);border-radius:14px;
   padding:16px 20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(20,40,30,.05)
 }
-body.admin-mode #siteManagerPanel{ display:block; }
+body.super-admin #siteManagerPanel{ display:block; }
+
+/* 관리자 전용(현장관리 등) — 담당현장에는 숨김 */
+.super-only{ display:none !important; }
+body.super-admin .super-only{ display:inline-block !important; }
 .sm-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .sm-head h3{font-size:14px;font-weight:800;margin:0}
 .sm-list{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow-y:auto}
@@ -362,7 +366,7 @@ body:not(.admin-mode) .memo{ pointer-events:none;opacity:.5; }
       <button class="btn sm" onclick="adminLogin()">로그인</button>
       <button class="btn sm outline" id="adminLogoutBtn" style="display:none" onclick="adminLogout()">로그아웃</button>
       <span class="admin-badge" id="adminBadge">✅ 관리자</span>
-      <button class="btn sm admin-only" id="siteManagerBtn" style="background:#7c3aed;color:#fff" onclick="toggleSiteManager()">🏗️ 현장관리</button>
+      <button class="btn sm super-only" id="siteManagerBtn" style="background:#7c3aed;color:#fff" onclick="toggleSiteManager()">🏗️ 현장관리</button>
       <span id="adminMsg" style="font-size:12px;color:var(--c2);font-weight:700"></span>
     </div>
       <input type="url" id="apiUrl" style="display:none">
@@ -495,6 +499,7 @@ function toggleSiteBlock(site){
   renderSiteManager();
 }
 function toggleSiteManager(){
+  if(loginRole!=='admin'){ return; }
   var panel = document.getElementById('siteManagerPanel');
   panel.style.display = (panel.style.display==='none'||panel.style.display==='') ? 'block' : 'none';
   if(panel.style.display==='block') renderSiteManager();
@@ -526,6 +531,7 @@ function adminLogin(){
     loginRole = 'admin'; loginSiteValue = '전체';
     activeSite = '전체';
     document.body.classList.add('admin-mode');
+    document.body.classList.add('super-admin');
     $('adminBar').classList.add('on');
     $('adminLogoutBtn').style.display='';
     $('adminBadge').textContent='✅ 관리자 (전체현장)';
@@ -544,6 +550,7 @@ function adminLogin(){
     loginRole = 'staff'; loginSiteValue = site;
     activeSite = site;
     document.body.classList.add('admin-mode');
+    document.body.classList.remove('super-admin');
     $('adminBar').classList.add('on');
     $('adminLogoutBtn').style.display='';
     $('adminBadge').textContent='✅ '+site;
@@ -565,6 +572,8 @@ function adminLogout(){
   loginRole=''; loginSiteValue='';
   activeSite='전체';
   document.body.classList.remove('admin-mode');
+  document.body.classList.remove('super-admin');
+  var smp=document.getElementById('siteManagerPanel'); if(smp) smp.style.display='none';
   $('adminBar').classList.remove('on');
   $('adminLogoutBtn').style.display='none';
   $('adminBadge').textContent='✅ 관리자';
@@ -582,6 +591,7 @@ function adminLogout(){
     loginRole = role; loginSiteValue = site||'전체';
     activeSite = loginSiteValue;
     document.body.classList.add('admin-mode');
+    if(role==='admin') document.body.classList.add('super-admin');
     $('adminBar').classList.add('on');
     $('adminLogoutBtn').style.display='';
     $('adminBadge').textContent = role==='admin' ? '✅ 관리자 (전체현장)' : '✅ '+site;
